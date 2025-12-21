@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "patients")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
