@@ -1,0 +1,91 @@
+.top-nav {
+  background: #2563eb;
+  color: #ffffff;
+  height: 60px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* pill-style buttons */
+.nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #e5e7eb;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, color 0.2s ease;
+}
+
+.nav-item span {
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.nav-item-active {
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.nav-item-active:hover {
+  background: #ffffff;
+  transform: none;
+}
+
+/* logout button still looks like nav link */
+.nav-logout {
+  border: none;
+}
+
+/* small-screen tweak */
+@media (max-width: 900px) {
+  .top-nav {
+    padding: 0 16px;
+  }
+
+  .nav-right {
+    gap: 6px;
+  }
+
+  .nav-item {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+
+  .nav-logo {
+    font-size: 18px;
+  }
+}

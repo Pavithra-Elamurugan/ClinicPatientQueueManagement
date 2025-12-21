@@ -1,0 +1,204 @@
+[
+  {
+    "step": "Read pom.xml to analyze backend dependencies and Spring Boot project structure.",
+    "sub_steps": [
+      "Open /home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/pom.xml",
+      "Identify all dependencies such as spring-boot-starter-web, spring-boot-starter-data-jpa, spring-boot-starter-validation, mysql-connector-java, lombok, and verify Java version.",
+      "Review backend directory structure to confirm locations for entities, repositories, services, controllers, and test classes."
+    ],
+    "files_to_add": [],
+    "files_to_edit": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/pom.xml"
+    ],
+    "description": "Ensures all required backend technologies and dependencies are available for building the application logic and persistence layer."
+  },
+  {
+    "step": "Implement core Entity classes for Patient, Doctor, and QueueEntry.",
+    "sub_steps": [
+      "Create Patient.java with required fields (id, name, contactNumber, dateOfBirth, medicalRecordNumber), validation annotations, and relationships.",
+      "Create Doctor.java with fields (id, name, specialization, averageConsultationTime), validation, and relationships.",
+      "Create QueueEntry.java with fields (id, patient ref, doctor ref, queueNumber, status(enum), joinTime, estimatedWaitTime, priority), proper enumeration and validation; set up relationships.",
+      "Use Lombok annotations for getters, setters, constructors.",
+      "Annotate JPA entities properly for mapping and constraints."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/entity/Patient.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/entity/Doctor.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/entity/QueueEntry.java"
+    ],
+    "files_to_edit": [],
+    "description": "Defines the core database models to represent patients, doctors, and their queue entries, supporting JPA and validation."
+  },
+  {
+    "step": "Create Repository interfaces for all Entities.",
+    "sub_steps": [
+      "Create PatientRepository extending JpaRepository<Patient, Long>.",
+      "Create DoctorRepository extending JpaRepository<Doctor, Long>.",
+      "Create QueueEntryRepository extending JpaRepository<QueueEntry, Long>, with custom finders for status and sorting."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/repository/PatientRepository.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/repository/DoctorRepository.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/repository/QueueEntryRepository.java"
+    ],
+    "files_to_edit": [],
+    "description": "Provides data access layer for all entities and enables efficient querying and persistence."
+  },
+  {
+    "step": "Implement Service classes for business logic and wait time calculations.",
+    "sub_steps": [
+      "Create PatientService with methods for creating and retrieving patients, including generating unique medicalRecordNumber.",
+      "Create DoctorService for managing doctors.",
+      "Create QueueEntryService to add patients to queue (with next queue number, WAITING status, joinTime) and implement wait time calculation logic as per requirements.",
+      "Add logic to update queue entry status and trigger wait time recalculation for affected entries.",
+      "Handle error scenarios (not found, invalid status, validation errors) through custom exceptions."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/service/PatientService.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/service/DoctorService.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/service/QueueEntryService.java"
+    ],
+    "files_to_edit": [],
+    "description": "Encapsulates business rules, data validation, and all core logic including queue number assignment, status transitions, and dynamic estimated wait time calculation."
+  },
+  {
+    "step": "Create REST Controllers exposing all required API endpoints.",
+    "sub_steps": [
+      "Implement PatientController for POST /api/patients and GET /api/patients (with validation and error handling).",
+      "Implement DoctorController for POST /api/doctors and GET /api/doctors.",
+      "Implement QueueController for POST /api/queue (add to queue with priority, estimated wait time logic), GET /api/queue (sorted by priority and joinTime), and PUT /api/queue/{id}/status (status update and downstream recalculation).",
+      "Ensure proper HTTP status codes, validation responses, and error message formatting.",
+      "Add CORS configuration to allow frontend access."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/controller/PatientController.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/controller/DoctorController.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/controller/QueueController.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/main/java/com/examly/springapp/config/CorsConfig.java"
+    ],
+    "files_to_edit": [],
+    "description": "Exposes all backend functionality via REST APIs, handling input validation, output formatting, status codes, and CORS setup for frontend communication."
+  },
+  {
+    "step": "Implement backend JUnit test cases for all specified behaviors.",
+    "sub_steps": [
+      "Implement testPatientCreation in PatientControllerTest to cover both valid and invalid patient creation scenarios and retrieval.",
+      "Implement testDoctorCreation in DoctorControllerTest to cover valid/invalid doctor addition and retrieval.",
+      "Implement testQueueEntryCreation in QueueControllerTest to cover adding to queue, assigning queue numbers, and handling error conditions.",
+      "Implement testWaitTimeCalculation using prepared data to validate estimated wait times with priorities and multiple queue entries.",
+      "Implement testQueueStatusUpdate for status transitions and validating wait time recalculations; cover invalid and not found scenarios.",
+      "Mock repositories and services as needed, and cover both positive/negative edge cases for each test."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/test/java/com/examly/springapp/controller/PatientControllerTest.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/test/java/com/examly/springapp/controller/DoctorControllerTest.java",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/springapp/src/test/java/com/examly/springapp/controller/QueueControllerTest.java"
+    ],
+    "files_to_edit": [],
+    "description": "Verifies backend API and business logic correctness, including success and error paths, addressing all requirements detailed in the test cases JSON."
+  },
+  {
+    "step": "Compile and verify backend project build and tests (Spring Boot).",
+    "sub_steps": [
+      "Run mvn clean compile -q -Dspring.main.banner-mode=off to check for compilation errors.",
+      "Run mvn test -q -Dspring.main.banner-mode=off to execute and verify all JUnit tests.",
+      "Run mvn clean install -q -Dspring.main.banner-mode=off for install verification."
+    ],
+    "files_to_add": [],
+    "files_to_edit": [],
+    "description": "Ensures backend code compiles cleanly and passes all automated JUnit tests, confirming that the implementation meets requirements."
+  },
+  {
+    "step": "Read package.json and examine frontend project structure for dependencies.",
+    "sub_steps": [
+      "Open /home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/package.json and review required dependencies (react, react-dom, react-scripts, testing libraries, etc).",
+      "Inspect src/ for current structure in preparation for adding components, utils, and test files."
+    ],
+    "files_to_add": [],
+    "files_to_edit": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/package.json"
+    ],
+    "description": "Ensures proper setup and context of the React environment prior to implementation of components and utilities."
+  },
+  {
+    "step": "Create API utility functions for backend service integration.",
+    "sub_steps": [
+      "Implement /src/utils/api.js for all backend REST calls: fetchAllPatients, fetchAllDoctors, fetchQueue, addPatientToQueue, updateQueueEntryStatus, with proper error handling.",
+      "Define backend base URL as http://localhost:8080.",
+      "Implement error propagation and handle HTTP errors gracefully."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/utils/api.js"
+    ],
+    "files_to_edit": [],
+    "description": "Centralizes all backend API logic and error handling, so that components can interact with backend simply and consistently."
+  },
+  {
+    "step": "Design and implement core React components (with CSS).",
+    "sub_steps": [
+      "Create components/PatientQueueDisplay.js: displays queue entries with sorting, colored status, and formatted details.",
+      "Create components/AddPatientToQueueForm.js: controlled form for patient, doctor, priority; handles validation, errors, submission and displays feedback.",
+      "Create components/DoctorView.js: doctor-specific queue view with controls for status changes, only appropriate action buttons by status.",
+      "Create a CSS file (e.g. src/App.css or component-scoped) for color system, layout, and styling per requirements (variables, status colors, layout, buttons, etc).",
+      "Ensure responsive container layouts and buttons use required utility classes."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/PatientQueueDisplay.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/AddPatientToQueueForm.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/DoctorView.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/PatientQueueDisplay.test.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/AddPatientToQueueForm.test.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/DoctorView.test.js"
+    ],
+    "files_to_edit": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/App.css"
+    ],
+    "description": "Implements all main UI views, with required styling, controls, and behavior for managing and viewing patient queue data as specified in requirements. Test file creation included for each component as per test case mapping."
+  },
+  {
+    "step": "Integrate components and state management into App.js.",
+    "sub_steps": [
+      "Update App.js to import and organize PatientQueueDisplay, AddPatientToQueueForm, and DoctorView components.",
+      "Use React state hooks to manage current queue, patients, doctors, and loading/error state.",
+      "Wire up API utility functions to handle CRUD operations and state updates.",
+      "Ensure queue updates live in UI after any action (add, status change).",
+      "Add global loading and error indicators as needed."
+    ],
+    "files_to_add": [],
+    "files_to_edit": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/App.js"
+    ],
+    "description": "Integrates all major features together, manages frontend state, and ensures seamless user interactions with the backend via API utility functions."
+  },
+  {
+    "step": "Implement Jest/React Testing Library test cases for React components and API integration.",
+    "sub_steps": [
+      "Implement testPatientQueueDisplay in PatientQueueDisplay.test.js, mocking API response, verifying correct render, sorting, color-coding, error and loading handling.",
+      "Implement testAddPatientToQueueForm in AddPatientToQueueForm.test.js, mocking API responses for dropdowns, form validation, submission outcomes, and error handling.",
+      "Implement testDoctorViewComponent in DoctorView.test.js, mocking API responses for doctor queues, actions, and button rules.",
+      "Implement testAPIIntegration in a utility or main App.test.js, mocking API functions, verifying state updates, loading, error handling.",
+      "Use correct data-testid or selectors for all queries per RTL best practices; avoid ambiguous or regex selectors; ensure no manual cleanup or blocking code.",
+      "Include loading, error, and mock setup for all negative and boundary scenarios specified in the test case JSON."
+    ],
+    "files_to_add": [
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/PatientQueueDisplay.test.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/AddPatientToQueueForm.test.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/components/DoctorView.test.js",
+      "/home/coder/project/workspace/question_generation_service/solutions/289d79e2-f746-4299-982b-f5d6a74d2d14/reactapp/src/App.test.js"
+    ],
+    "files_to_edit": [],
+    "description": "Covers all prescribed frontend test cases with focused coverage, including both UI and integration logic, ensuring correct component operation and frontend-backend contract."
+  },
+  {
+    "step": "Compile and verify React project build and tests.",
+    "sub_steps": [
+      "Run npm install inside /reactapp to install all frontend dependencies.",
+      "Run npm run build to compile and check for errors.",
+      "Run npx eslint src/ --fix to lint and auto-fix code issues.",
+      "Run npm run test:ci to execute all Jest tests non-interactively and verify correct behavior."
+    ],
+    "files_to_add": [],
+    "files_to_edit": [],
+    "description": "Ensures all React code is valid, correctly formatted, compiles without error, and passes all designated tests, finalizing the implementation for delivery."
+  }
+]
