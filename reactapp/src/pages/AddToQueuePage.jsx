@@ -12,6 +12,12 @@ export default function AddToQueuePage({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!patientId || !doctorId || !priority) {
+      alert("Please select all fields!");
+      return;
+    }
+
     addToQueue({ patientId, doctorId, priority });
   };
 
@@ -21,24 +27,41 @@ export default function AddToQueuePage({
         <h2 className="form-title">Add Patient To Queue</h2>
 
         <form onSubmit={handleSubmit} className="form-fields">
+
+          {/* PATIENT SELECT */}
           <label>Patient selection</label>
-          <select value={patientId} onChange={(e) => setPatientId(e.target.value)}>
+          <select
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+          >
             <option value="">Select Patient</option>
             {patients.map((p) => (
-              <option key={p.id} value={p.id}>{p.patientName}</option>
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
             ))}
           </select>
 
+          {/* DOCTOR SELECT */}
           <label>Doctor selection</label>
-          <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
+          <select
+            value={doctorId}
+            onChange={(e) => setDoctorId(e.target.value)}
+          >
             <option value="">Select Doctor</option>
             {doctors.map((d) => (
-              <option key={d.id} value={d.id}>{d.doctorName}</option>
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
             ))}
           </select>
 
+          {/* PRIORITY SELECT */}
           <label>Priority selection</label>
-          <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+          >
             <option value="">Select Priority</option>
             {[1, 2, 3, 4, 5].map((p) => (
               <option key={p} value={p}>{p}</option>

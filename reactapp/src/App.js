@@ -12,7 +12,6 @@ import LoginPage from "./pages/LoginPage";
 import AddDoctorPage from "./pages/AddDoctorPage";
 import AddPatientPage from "./pages/AddPatientPage";
 
-
 import {
   fetchAllPatients,
   fetchAllDoctors,
@@ -31,13 +30,11 @@ export default function App() {
   const [error, setError] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
 
-  // NEW: current logged-in role: "ADMIN" | "DOCTOR" | "PATIENT" | null
   const [role, setRole] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
+  /* -----------------------------------------------------------
+     AUTO-REFRESH LOGIC (LIVE UPDATE)
+  ----------------------------------------------------------- */
   const loadData = async () => {
     try {
       const [queue, pats, docs] = await Promise.all([
@@ -55,13 +52,23 @@ export default function App() {
     }
   };
 
+  // Load once + then refresh every 3 seconds
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* -----------------------------------------------------------
+     CRUD ACTIONS
+  ----------------------------------------------------------- */
+
   const addToQueue = async (entry) => {
     setLoading(true);
-    setError("");
     try {
       await addPatientToQueue(entry);
-      const updated = await fetchQueue();
-      setQueueEntries(updated || []);
+      loadData(); // refresh instantly
     } catch (err) {
       setError(err.message || "Failed to add to queue");
     } finally {
@@ -71,13 +78,11 @@ export default function App() {
 
   const onStatusChange = async (id, status) => {
     setLoading(true);
-    setError("");
     try {
       await updateQueueEntryStatus(id, status);
-      const updated = await fetchQueue();
-      setQueueEntries(updated || []);
+      loadData();
     } catch (err) {
-      setError(err.message || "Failed to update");
+      setError(err.message || "Failed to update status");
     } finally {
       setLoading(false);
     }
@@ -109,14 +114,21 @@ export default function App() {
     }
   };
 
-  // handle login from LoginPage
+  /* -----------------------------------------------------------
+     LOGIN / LOGOUT
+  ----------------------------------------------------------- */
+
   const handleLogin = ({ role }) => {
-    setRole(role); // "ADMIN" | "DOCTOR" | "PATIENT"
+    setRole(role);
   };
 
   const handleLogout = () => {
     setRole(null);
   };
+
+  /* -----------------------------------------------------------
+     ROUTES
+  ----------------------------------------------------------- */
 
   return (
     <Router>
@@ -131,7 +143,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-        {/* Login accessible to everyone */}
         <Route
           path="/login"
           element={
@@ -143,7 +154,6 @@ export default function App() {
           }
         />
 
-        {/* Admin: can access everything */}
         <Route
           path="/queue-add"
           element={
@@ -156,6 +166,7 @@ export default function App() {
             />
           }
         />
+
         <Route
           path="/queue-list"
           element={
@@ -166,15 +177,20 @@ export default function App() {
             />
           }
         />
-        <Route
-  path="/add-doctor"
-  element={<AddDoctorPage addDoctor={addDoctor} loading={loading} />}
-/>
 
-<Route
-  path="/add-patient"
-  element={<AddPatientPage addPatient={addPatient} loading={loading} />}
-/>
+        <Route
+          path="/add-doctor"
+          element={
+            <AddDoctorPage addDoctor={addDoctor} loading={loading} />
+          }
+        />
+
+        <Route
+          path="/add-patient"
+          element={
+            <AddPatientPage addPatient={addPatient} loading={loading} />
+          }
+        />
 
         <Route
           path="/doctor-view"
