@@ -1,105 +1,64 @@
-const BASE_URL = "http://localhost:8080/api";  
-// Make sure your Spring Boot is running on 8080
+const BASE_URL = "http://localhost:8080/api";
 
-// Helper → safely parse JSON or text
-const parseResponse = async (res) => {
-  const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    return text;
-  }
-};
-
-/* ----------------------- GET PATIENTS ----------------------- */
-export const fetchAllPatients = async () => {
-  const res = await fetch(`${BASE_URL}/patients`);
-  if (!res.ok) throw new Error("Failed to fetch patients");
-  return res.json();
-};
-
-/* ----------------------- GET DOCTORS ----------------------- */
-export const fetchAllDoctors = async () => {
-  const res = await fetch(`${BASE_URL}/doctors`);
-  if (!res.ok) throw new Error("Failed to fetch doctors");
-  return res.json();
-};
-
-/* ----------------------- GET QUEUE ----------------------- */
-export const fetchQueue = async () => {
-  const res = await fetch(`${BASE_URL}/queue`);
-  if (!res.ok) throw new Error("Failed to fetch queue");
-  return res.json();
-};
-
-/* ----------------------- ADD TO QUEUE ----------------------- */
-export const addPatientToQueue = async (data) => {
-  const res = await fetch(`${BASE_URL}/queue`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+/* ----------------------- HELPER ----------------------- */
+const request = async (url, options = {}) => {
+  const res = await fetch(`${BASE_URL}${url}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
   });
 
-  const responseBody = await parseResponse(res);
+  const text = await res.text();
+  let data;
 
-  if (!res.ok) {
-    console.error("Queue Add Error:", responseBody);
-    throw new Error(responseBody || "Failed to add patient to queue");
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
   }
 
-  return responseBody;
+  if (!res.ok) {
+    console.error("API Error:", data);
+    throw new Error(data || "Something went wrong");
+  }
+
+  return data;
 };
 
-/* ----------------------- UPDATE QUEUE STATUS ----------------------- */
-export const updateQueueEntryStatus = async (id, status) => {
-  const res = await fetch(`${BASE_URL}/queue/${id}/status`, {
+/* ----------------------- PATIENTS ----------------------- */
+export const fetchAllPatients = () =>
+  request("/patients");
+
+export const createPatient = (payload) =>
+  request("/patients", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+/* ----------------------- DOCTORS ----------------------- */
+export const fetchAllDoctors = () =>
+  request("/doctors");
+
+export const createDoctor = (payload) =>
+  request("/doctors", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+/* ----------------------- QUEUE ----------------------- */
+export const fetchQueue = () =>
+  request("/queue");
+
+export const addPatientToQueue = (payload) =>
+  request("/queue", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateQueueEntryStatus = (id, status) =>
+  request(`/queue/${id}/status`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-
-  const responseBody = await parseResponse(res);
-
-  if (!res.ok) {
-    console.error("Update Status Error:", responseBody);
-    throw new Error(responseBody || "Failed to update status");
-  }
-
-  return responseBody;
-};
-
-/* ----------------------- CREATE DOCTOR ----------------------- */
-export const createDoctor = async (payload) => {
-  const res = await fetch(`${BASE_URL}/doctors`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const responseBody = await parseResponse(res);
-
-  if (!res.ok) {
-    console.error("Create Doctor Error:", responseBody);
-    throw new Error(responseBody || "Failed to create doctor");
-  }
-
-  return responseBody;
-};
-
-/* ----------------------- CREATE PATIENT ----------------------- */
-export const createPatient = async (payload) => {
-  const res = await fetch(`${BASE_URL}/patients`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const responseBody = await parseResponse(res);
-
-  if (!res.ok) {
-    console.error("Create Patient Error:", responseBody);
-    throw new Error(responseBody || "Failed to create patient");
-  }
-
-  return responseBody;
-};

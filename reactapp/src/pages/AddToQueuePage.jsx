@@ -1,24 +1,30 @@
 import React, { useState } from "react";
 import "./FormStyles.css";
+import { toast } from "react-toastify";
+import AddPatientToQueueForm from "../components/AddPatientToQueueForm";
 
 export default function AddToQueuePage({
   patients = [],
   doctors = [],
-  addToQueue
+  addToQueue,
 }) {
-  const [patientId, setPatientId] = useState("");
-  const [doctorId, setDoctorId] = useState("");
-  const [priority, setPriority] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleAddToQueue = async (data) => {
+    setLoading(true);
+    setError("");
 
-    if (!patientId || !doctorId || !priority) {
-      alert("Please select all fields!");
-      return;
+    try {
+      await addToQueue(data);
+      toast.success("Added to queue successfully ✔");
+    } catch (err) {
+      setError("Failed to add to queue");
+      toast.error("Failed to add to queue ❌");
+      throw err;
+    } finally {
+      setLoading(false);
     }
-
-    addToQueue({ patientId, doctorId, priority });
   };
 
   return (
@@ -26,50 +32,13 @@ export default function AddToQueuePage({
       <div className="form-card">
         <h2 className="form-title">Add Patient To Queue</h2>
 
-        <form onSubmit={handleSubmit} className="form-fields">
-
-          {/* PATIENT SELECT */}
-          <label>Patient selection</label>
-          <select
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value)}
-          >
-            <option value="">Select Patient</option>
-            {patients.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-
-          {/* DOCTOR SELECT */}
-          <label>Doctor selection</label>
-          <select
-            value={doctorId}
-            onChange={(e) => setDoctorId(e.target.value)}
-          >
-            <option value="">Select Doctor</option>
-            {doctors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-
-          {/* PRIORITY SELECT */}
-          <label>Priority selection</label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="">Select Priority</option>
-            {[1, 2, 3, 4, 5].map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
-
-          <button type="submit" className="form-btn">Add to Queue</button>
-        </form>
+        <AddPatientToQueueForm
+          patients={patients}
+          doctors={doctors}
+          onSubmit={handleAddToQueue}
+          loading={loading}
+          error={error}
+        />
       </div>
     </div>
   );

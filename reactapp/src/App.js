@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 
 import Navigation from "./layout/Navigation";
@@ -12,6 +17,13 @@ import LoginPage from "./pages/LoginPage";
 import AddDoctorPage from "./pages/AddDoctorPage";
 import AddPatientPage from "./pages/AddPatientPage";
 
+// 🔥 Toastify
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// ✅ Background Image (FROM src/assets)
+import background from "./assets/background.jpg";
+
 import {
   fetchAllPatients,
   fetchAllDoctors,
@@ -22,6 +34,35 @@ import {
   createPatient,
 } from "./utils/api";
 
+/* ============================================================
+   🔧 STEP 3: LAYOUT WRAPPER (ADD ABOVE App)
+============================================================ */
+function AppLayout({ children }) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  return (
+    <div
+      style={
+        !isHomePage
+          ? {
+              minHeight: "100vh",
+              backgroundImage: `url(${background})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }
+          : {}
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================
+   MAIN APP
+============================================================ */
 export default function App() {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -29,12 +70,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
-
   const [role, setRole] = useState(null);
 
-  /* -----------------------------------------------------------
-     AUTO-REFRESH LOGIC (LIVE UPDATE)
-  ----------------------------------------------------------- */
+  /* ---------------- AUTO REFRESH ---------------- */
   const loadData = async () => {
     try {
       const [queue, pats, docs] = await Promise.all([
@@ -42,7 +80,6 @@ export default function App() {
         fetchAllPatients(),
         fetchAllDoctors(),
       ]);
-
       setQueueEntries(queue || []);
       setPatients(pats || []);
       setDoctors(docs || []);
@@ -52,25 +89,22 @@ export default function App() {
     }
   };
 
-  // Load once + then refresh every 3 seconds
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 3000);
-
     return () => clearInterval(interval);
   }, []);
 
-  /* -----------------------------------------------------------
-     CRUD ACTIONS
-  ----------------------------------------------------------- */
-
+  /* ---------------- ACTIONS ---------------- */
   const addToQueue = async (entry) => {
     setLoading(true);
     try {
       await addPatientToQueue(entry);
-      loadData(); // refresh instantly
+      toast.success("Patient added to queue ✔");
+      loadData();
     } catch (err) {
-      setError(err.message || "Failed to add to queue");
+      toast.error("Failed to add patient ❌");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -80,9 +114,11 @@ export default function App() {
     setLoading(true);
     try {
       await updateQueueEntryStatus(id, status);
+      toast.success("Status updated ✔");
       loadData();
     } catch (err) {
-      setError(err.message || "Failed to update status");
+      toast.error("Failed to update status ❌");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -92,10 +128,8 @@ export default function App() {
     setLoading(true);
     try {
       await createDoctor(data);
+      toast.success("Doctor added ✔");
       loadData();
-    } catch (err) {
-      setError(err.message);
-      throw err;
     } finally {
       setLoading(false);
     }
@@ -105,108 +139,80 @@ export default function App() {
     setLoading(true);
     try {
       await createPatient(data);
+      toast.success("Patient added ✔");
       loadData();
-    } catch (err) {
-      setError(err.message);
-      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  /* -----------------------------------------------------------
-     LOGIN / LOGOUT
-  ----------------------------------------------------------- */
+  const handleLogin = ({ role }) => setRole(role);
+  const handleLogout = () => setRole(null);
 
-  const handleLogin = ({ role }) => {
-    setRole(role);
-  };
-
-  const handleLogout = () => {
-    setRole(null);
-  };
-
-  /* -----------------------------------------------------------
-     ROUTES
-  ----------------------------------------------------------- */
-
+  /* ---------------- UI ---------------- */
   return (
     <Router>
       <Navigation role={role} onLogout={handleLogout} />
 
-      {error && (
-        <p style={{ color: "red", textAlign: "center", marginTop: 10 }}>
-          {error}
-        </p>
-      )}
+      <ToastContainer position="top-center" autoClose={2000} theme="colored" />
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+      {/* ✅ BACKGROUND APPLIED HERE */}
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
 
-        <Route
-          path="/login"
-          element={
-            <LoginPage
-              onLogin={handleLogin}
-              loading={loading}
-              error={""}
-            />
-          }
-        />
+          <Route
+            path="/login"
+            element={<LoginPage onLogin={handleLogin} loading={loading} />}
+          />
 
-        <Route
-          path="/queue-add"
-          element={
-            <AddToQueuePage
-              patients={patients}
-              doctors={doctors}
-              addToQueue={addToQueue}
-              loading={loading}
-              error={error}
-            />
-          }
-        />
+          <Route
+            path="/queue-add"
+            element={
+              <AddToQueuePage
+                patients={patients}
+                doctors={doctors}
+                addToQueue={addToQueue}
+                loading={loading}
+              />
+            }
+          />
 
-        <Route
-          path="/queue-list"
-          element={
-            <QueueDisplayPage
-              queueEntries={queueEntries}
-              loading={loading}
-              error={error}
-            />
-          }
-        />
+          <Route
+            path="/queue-list"
+            element={
+              <QueueDisplayPage
+                queueEntries={queueEntries}
+                loading={loading}
+              />
+            }
+          />
 
-        <Route
-          path="/add-doctor"
-          element={
-            <AddDoctorPage addDoctor={addDoctor} loading={loading} />
-          }
-        />
+          <Route
+            path="/add-doctor"
+            element={<AddDoctorPage addDoctor={addDoctor} loading={loading} />}
+          />
 
-        <Route
-          path="/add-patient"
-          element={
-            <AddPatientPage addPatient={addPatient} loading={loading} />
-          }
-        />
+          <Route
+            path="/add-patient"
+            element={<AddPatientPage addPatient={addPatient} loading={loading} />}
+          />
 
-        <Route
-          path="/doctor-view"
-          element={
-            <DoctorDashboardPage
-              doctors={doctors}
-              queueEntries={queueEntries}
-              onStatusChange={onStatusChange}
-              selectedDoctorId={selectedDoctorId}
-              setSelectedDoctorId={setSelectedDoctorId}
-              loading={loading}
-              error={error}
-            />
-          }
-        />
-      </Routes>
+          <Route
+            path="/doctor-view"
+            element={
+              <DoctorDashboardPage
+                doctors={doctors}
+                queueEntries={queueEntries}
+                onStatusChange={onStatusChange}
+                selectedDoctorId={selectedDoctorId}
+                setSelectedDoctorId={setSelectedDoctorId}
+                loading={loading}
+              />
+            }
+          />
+        </Routes>
+      </AppLayout>
     </Router>
   );
 }

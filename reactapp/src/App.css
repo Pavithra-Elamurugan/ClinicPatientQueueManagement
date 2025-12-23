@@ -3,11 +3,7 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  background-color: #f3f4f6;
-  font-family: Arial, sans-serif;
-}
+
 
 .App {
   text-align: center;
@@ -133,12 +129,17 @@ th {
 }
 
 /* Generic centered page wrapper */
-.page-center {
+.page-center{
+  min-height: calc(100vh - 80px); /* navbar height */
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 50px;
+  padding: 20px;
+
+  /* IMPORTANT: no background here */
+  background: transparent;
 }
+
 
 /* Generic card (used e.g. in DoctorDashboardPage) */
 .card {
@@ -580,3 +581,11 @@ select {
   color: #6b7280;
   background: #f3f4f6;
 }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+
+
